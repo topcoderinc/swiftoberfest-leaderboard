@@ -1,0 +1,22 @@
+{
+  "name": "leaderboard",
+  "version": "1.0.0",
+  "description": "A worker process that updates the Swiftoberfest leaderboard every hour",
+  "main": "worker.js",
+  "scripts": {
+    "start": "node worker.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mithun Kamath <callmekatootie@gmail.com>",
+  "private": true,
+  "engines": {
+    "node": "0.10.40"
+  },
+  "dependencies": {
+    "async": "^1.5.0",
+    "config": "^1.16.0",
+    "mongodb": "^2.0.46",
+    "superagent": "^1.4.0",
+    "underscore": "^1.8.3"
+  }
+}
