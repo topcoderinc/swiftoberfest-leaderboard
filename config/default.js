@@ -9,7 +9,7 @@ module.exports = {
         technologies: 'iOS,SWIFT,tvOS'
     },
     RESULT_URL: 'https://api.topcoder.com/v2/develop/challenges/result/',
-    MONGODB_URL: process.env.MONGOLAB_URL || 'mongodb://localhost:27017/swiftleaderboard',
+    MONGODB_URL: process.env.MONGOLAB_URI || 'mongodb://localhost:27017/swiftleaderboard',
     CHALLENGES_COLLECTION: 'challenges',
     LEADERBOARD_COLLECTION: 'rankings',
     KEYWORD: 'swiftoberfest',
