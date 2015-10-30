@@ -362,7 +362,8 @@ function handleRequest(request, response) {
                         response.end();
                     } else {
                         response.writeHead(200, {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
                         });
                         response.write(JSON.stringify(ranks));
                         response.end();
