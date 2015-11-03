@@ -184,14 +184,20 @@ function _getChallengeResults(challengeId, challengeCommunity, callback) {
 
 //Returns score based on placement
 function _getScore (placement) {
-    var score = 100 - ((placement - 1) * 10);
+    //Sometimes the placement will be "n/a" - reference challenge #30051828 - Return 0 so as to not
+    //spoil the sum of scores later
+    if (_.isNumber(placement)) {
+        var score = 100 - ((placement - 1) * 10);
 
-    if (score < 0) {
-        //Minimum is 10
-        score = 10;
+        if (score < 0) {
+            //Minimum is 10
+            score = 10;
+        }
+
+        return score;
+    } else {
+        return 0;
     }
-
-    return score;
 }
 
 //Prepares the leaderboard
@@ -217,7 +223,17 @@ function _prepareLeaderboard (results, callback) {
         currentMonthResults.forEach(function (r) {
             r.results.forEach(function (p) {
                 //Participant is considered only if they have a passing score in their submission
-                if (p.finalScore >= config.PASSING_SCORE) {
+                //Develop Challenges have this attribute, design don't
+                if (_.has(p, 'finalScore')) {
+                    if (p.finalScore >= config.PASSING_SCORE) {
+                        if (_.has(ranks.scores, p.handle)) {
+                            //Participant is already part of the rankings. Add to the existing score.
+                            ranks.scores[p.handle] += _getScore(p.placement);
+                        } else {
+                            ranks.scores[p.handle] = _getScore(p.placement);
+                        }
+                    }
+                } else {
                     if (_.has(ranks.scores, p.handle)) {
                         //Participant is already part of the rankings. Add to the existing score.
                         ranks.scores[p.handle] += _getScore(p.placement);
