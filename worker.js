@@ -281,21 +281,26 @@ function _calculateRankings (callback) {
     async.waterfall([
         function (cb1) {
             //Get all the challenges applicable for swiftoberfest from topcoder
+            console.log('Get challenges from topcoder...');
             _getChallengesFromTopcoder(cb1);
         },
         function (challenges, cb2) {
             //Get all challenges (only ids) that we have already read and stored in database
+            console.log('Get old challenges from database...');
             _getChallengesFromDatabase(challenges, false, cb2);
         },
         function (challengesFromTopcoder, challengeIdsFromDb, cb3) {
             //Detect the new challenges
+            console.log('Determining the new challenges from topcoder...');
             _getNewChallenges(challengesFromTopcoder, challengeIdsFromDb, cb3);
         },
         function (newChallenges, cb4) {
             if (newChallenges.length > 0) {
                 //Store the new challenges in the database
+                console.log('Adding new challenges into database...');
                 _insertNewChallengesIntoDatabase(newChallenges, cb4);
             } else {
+                console.log('No new challenges found');
                 cb4();
             }
         },
@@ -305,10 +310,12 @@ function _calculateRankings (callback) {
             //This is because if any of the challenges have a dispute and the results are updated,
             //we do not want to use the invalid results.
             //Thus, we are going to get the results each time
+            console.log('Getting current challenges in database...');
             _getChallengesFromDatabase(null, true, cb5);
         },
         function (challenges, cb6) {
             //Get the results for the challenges
+            console.log('Getting challenges results');
             async.mapLimit(challenges, 5, function (challenge, cb7) {
                 _getChallengeResults(challenge.challengeId, challenge.challengeCommunity, cb7);
             }, cb6);
@@ -316,6 +323,7 @@ function _calculateRankings (callback) {
         function (results, cb8) {
             //Some challenges could still be active and thus no results will exist for them
             //Keep only the valid results
+            console.log('Preparing leaderboard...');
             var validResults = _.filter(results, function (r) {
                 return !!r;
             });
@@ -323,6 +331,7 @@ function _calculateRankings (callback) {
             _prepareLeaderboard(validResults, cb8);
         },
         function (ranks, cb9) {
+            console.log('Updating leaderboard...');
             _updateLeaderboardInDatabase(ranks, cb9);
         }
     ], function (err) {
