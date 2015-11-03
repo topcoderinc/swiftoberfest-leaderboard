@@ -70,21 +70,31 @@ function _getChallengesFromTopcoder (callback) {
 }
 
 //Gets all the challenges stored in our database
-function _getChallengesFromDatabase (challengesFromTopcoder, callback) {
+function _getChallengesFromDatabase (challengesFromTopcoder, withCommunity, callback) {
+    var projection = {
+        challengeId: 1,
+        _id: 0
+    };
+
+    if (withCommunity) {
+        projection.challengeCommunity = 1;
+    }
+
     mongodbConnection.collection(config.CHALLENGES_COLLECTION)
-        .find({}, {
-            challengeId: 1,
-            _id: 0
-        })
+        .find({}, projection)
         .toArray(function (err, challengesFromDb) {
             var challengeIdsFromDb;
 
             if (err) {
                 callback(err);
-            } else if (challengesFromDb.length > 0) {
-                challengeIdsFromDb = _.pluck(challengesFromDb, 'challengeId');
+            } else if (!withCommunity) {
+                if (challengesFromDb.length > 0) {
+                    challengeIdsFromDb = _.pluck(challengesFromDb, 'challengeId');
+                } else {
+                    challengeIdsFromDb = [];
+                }
             } else {
-                challengeIdsFromDb = [];
+                challengeIdsFromDb = challengesFromDb;
             }
 
             if (challengesFromTopcoder) {
@@ -111,7 +121,8 @@ function _getNewChallenges (challengesFromTopcoder, challengeIdsFromDb, callback
             challenge.challengeId = c.challengeId;
             challenge.status = c.status;
             challenge.registrationStartDate = c.registrationStartDate;
-            challenge.challengeName = c.challengeName
+            challenge.challengeName = c.challengeName;
+            challenge.challengeCommunity = c.challengeCommunity;
 
             return challenge;
         });
@@ -138,8 +149,14 @@ function _insertNewChallengesIntoDatabase(newChallenges, callback) {
 }
 
 //Get the results for a challenge
-function _getChallengeResults(challengeId, callback) {
-    var url = config.RESULT_URL + challengeId;
+function _getChallengeResults(challengeId, challengeCommunity, callback) {
+    var url;
+
+    if (challengeCommunity === config.DEVELOP_TYPE) {
+        url = config.DEVELOP_RESULT_URL + challengeId;
+    } else {
+        url = config.DESIGN_RESULT_URL + challengeId;
+    }
 
     superagent.get(url)
         .end(function (err, res) {
@@ -268,7 +285,7 @@ function _calculateRankings (callback) {
         },
         function (challenges, cb2) {
             //Get all challenges (only ids) that we have already read and stored in database
-            _getChallengesFromDatabase(challenges, cb2);
+            _getChallengesFromDatabase(challenges, false, cb2);
         },
         function (challengesFromTopcoder, challengeIdsFromDb, cb3) {
             //Detect the new challenges
@@ -288,12 +305,12 @@ function _calculateRankings (callback) {
             //This is because if any of the challenges have a dispute and the results are updated,
             //we do not want to use the invalid results.
             //Thus, we are going to get the results each time
-            _getChallengesFromDatabase(null, cb5);
+            _getChallengesFromDatabase(null, true, cb5);
         },
         function (challenges, cb6) {
             //Get the results for the challenges
-            async.mapLimit(challenges, 5, function (challengeId, cb7) {
-                _getChallengeResults(challengeId, cb7);
+            async.mapLimit(challenges, 5, function (challenge, cb7) {
+                _getChallengeResults(challenge.challengeId, challenge.challengeCommunity, cb7);
             }, cb6);
         },
         function (results, cb8) {

@@ -8,7 +8,10 @@ module.exports = {
         sortOrder: 'desc',
         technologies: 'iOS,SWIFT,tvOS'
     },
-    RESULT_URL: 'https://api.topcoder.com/v2/develop/challenges/result/',
+    DESIGN_TYPE: 'design',
+    DEVELOP_TYPE: 'develop',
+    DEVELOP_RESULT_URL: 'https://api.topcoder.com/v2/develop/challenges/result/',
+    DESIGN_RESULT_URL: 'https://api.topcoder.com/v2/design/challenges/result/',
     MONGODB_URL: process.env.MONGOLAB_URI || 'mongodb://localhost:27017/swiftleaderboard',
     CHALLENGES_COLLECTION: 'challenges',
     LEADERBOARD_COLLECTION: 'rankings',
@@ -19,19 +22,22 @@ module.exports = {
             challengeId: 30051611,
             status: 'active',
             registrationStartDate: '2015-10-05T09:23+0000',
-            challengeName: 'Convert existing HTML5 prototype to Swift iOS + Integrate Salesforce Mobile SDK oAuth [Swiftoberfest]'
+            challengeName: 'Convert existing HTML5 prototype to Swift iOS + Integrate Salesforce Mobile SDK oAuth [Swiftoberfest]',
+            challengeCommunity: 'develop'
         },
         {
             challengeId: 30051785,
             status: 'active',
             registrationStartDate: '2015-10-16T09:00+0000',
-            challengeName: 'Design Arch - REST API Authentication Setup on Heroku for iOS [Swiftoberfest]'
+            challengeName: 'Design Arch - REST API Authentication Setup on Heroku for iOS [Swiftoberfest]',
+            challengeCommunity: 'develop'
         },
         {
             challengeId: 30051788,
             status: 'active',
             registrationStartDate: '2015-10-17T00:01+0000',
-            challengeName: 'Mood-ring Build mood-ring Swift app user and manager functionality [Swiftoberfest]'
+            challengeName: 'Mood-ring Build mood-ring Swift app user and manager functionality [Swiftoberfest]',
+            challengeCommunity: 'develop'
         },
     ],
     MONTHS: ['october', 'november', 'december'],
