@@ -72,6 +72,7 @@ function _getChallengesFromTopcoder (callback) {
 function _getChallengesFromDatabase (challengesFromTopcoder, withCommunity, callback) {
     var projection = {
         challengeId: 1,
+        registrationStartDate: 1,
         _id: 0
     };
 
@@ -148,13 +149,13 @@ function _insertNewChallengesIntoDatabase(newChallenges, callback) {
 }
 
 //Get the results for a challenge
-function _getChallengeResults(challengeId, challengeCommunity, callback) {
+function _getChallengeResults(challenge, callback) {
     var url;
 
-    if (challengeCommunity === config.DEVELOP_TYPE) {
-        url = config.DEVELOP_RESULT_URL + challengeId;
+    if (challenge.challengeCommunity === config.DEVELOP_TYPE) {
+        url = config.DEVELOP_RESULT_URL + challenge.challengeId;
     } else {
-        url = config.DESIGN_RESULT_URL + challengeId;
+        url = config.DESIGN_RESULT_URL + challenge.challengeId;
     }
 
     superagent.get(url)
@@ -172,7 +173,7 @@ function _getChallengeResults(challengeId, challengeCommunity, callback) {
 
                 callback(err);
             } else if (res.body && res.body.results) {
-                challengeDetails.challengeEndDate = res.body.challengeEndDate
+                challengeDetails.challengeStartDate = challenge.registrationStartDate;
                 challengeDetails.results = res.body.results;
 
                 callback(err, challengeDetails);
@@ -211,9 +212,9 @@ function _prepareLeaderboard (results, callback) {
 
         //Get all results that are applicable for the current month
         var currentMonthResults = _.filter(results, function (r) {
-            var challengeEndDate = new Date(r.challengeEndDate);
+            var challengeStartDate = new Date(r.challengeStartDate);
 
-            return (challengeEndDate <= config.END_DATE[month]) && (challengeEndDate >= config.START_DATE[month]);
+            return (challengeStartDate <= config.END_DATE[month]) && (challengeStartDate >= config.START_DATE[month]);
         });
 
         ranks.month = month;
@@ -332,7 +333,7 @@ function _calculateRankings (callback) {
             //Get the results for the challenges
             console.log('Getting challenges results');
             async.mapLimit(challenges, 5, function (challenge, cb7) {
-                _getChallengeResults(challenge.challengeId, challenge.challengeCommunity, cb7);
+                _getChallengeResults(challenge, cb7);
             }, cb6);
         },
         function (results, cb8) {
