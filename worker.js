@@ -336,12 +336,40 @@ function _calculateRankings (callback) {
             }, cb6);
         },
         function (results, cb8) {
+            var validResults,
+                sortedResults,
+                participants,
+                filteredResults;
+
             //Some challenges could still be active and thus no results will exist for them
             //Keep only the valid results
             console.log('Preparing leaderboard...');
-            var validResults = _.filter(results, function (r) {
+
+            validResults = _.filter(results, function (r) {
                 return !!r;
             });
+
+            //Design results may contain multiple occurrences of the same participant.
+            //Keep the one where the participant has the highest placement (1 is highest)
+            for (var i = 0; i < validResults.length; i++) {
+                sortedResults = _.sortBy(validResults[i].results, 'placement');
+
+                participants = [];
+
+                filteredResults = [];
+
+                for (var j = 0; j < sortedResults.length; j++) {
+                    if (_.isNumber(sortedResults[j].placement)) {
+                        if (participants.indexOf(sortedResults[j].handle) === -1) {
+                            filteredResults.push(sortedResults[j]);
+
+                            participants.push(sortedResults[j].handle)
+                        }
+                    }
+                }
+
+                validResults[i].results = filteredResults;
+            }
 
             _prepareLeaderboard(validResults, cb8);
         },
